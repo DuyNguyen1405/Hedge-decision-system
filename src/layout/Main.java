@@ -29,10 +29,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import lib.Hedge;
 import main.Car;
-import test.Sample1;
-import test.SelectionAdapter;
-import test.SelectionPainter;
-import test.test;
 
 import java.awt.BorderLayout;
 import java.awt.Insets;
@@ -176,7 +172,7 @@ public class Main{
     }
     
     private static ImageIcon createImageIcon(String path, String description) {
-        java.net.URL imgURL = Sample1.class.getResource(path);
+        java.net.URL imgURL = Main.class.getResource(path);
         
         if (imgURL != null) {
            return new ImageIcon(imgURL, description);

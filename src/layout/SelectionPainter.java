@@ -1,5 +1,5 @@
 
-package test;
+package layout;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
