@@ -141,27 +141,27 @@ public class Main{
 
         JLabel statusbar = new JLabel(" Statusbar");
         frame.add(statusbar, BorderLayout.SOUTH);
-
-        
-        mapViewer.addPropertyChangeListener("zoom", new PropertyChangeListener()
-		{
-			@Override
-			public void propertyChange(PropertyChangeEvent evt)
-			{
-				updateWindowTitle(frame, mapViewer);
-			}
-		});
-		
-		mapViewer.addPropertyChangeListener("center", new PropertyChangeListener()
-		{
-			@Override
-			public void propertyChange(PropertyChangeEvent evt)
-			{
-				updateWindowTitle(frame, mapViewer);
-			}
-		});
-		
-		updateWindowTitle(frame, mapViewer);
+        frame.setTitle("Hedge decision system"); 
+//        
+//        mapViewer.addPropertyChangeListener("zoom", new PropertyChangeListener()
+//		{
+//			@Override
+//			public void propertyChange(PropertyChangeEvent evt)
+//			{
+//				updateWindowTitle(frame, mapViewer);
+//			}
+//		});
+//		
+//		mapViewer.addPropertyChangeListener("center", new PropertyChangeListener()
+//		{
+//			@Override
+//			public void propertyChange(PropertyChangeEvent evt)
+//			{
+//				updateWindowTitle(frame, mapViewer);
+//			}
+//		});
+//		
+//		updateWindowTitle(frame, mapViewer);
 		System.out.println(driveIcon.getIconHeight());
     }
 
@@ -187,7 +187,7 @@ public class Main{
 		double lat = mapViewer.getCenterPosition().getLatitude();
 		double lon = mapViewer.getCenterPosition().getLongitude();
 		int zoom = mapViewer.getZoom();
-		frame.setTitle(String.format("JXMapviewer2 Example 3 (%.2f / %.2f) - Zoom: %d", lat, lon, zoom)); 
+		frame.setTitle(String.format("Hedge decision system (%.2f / %.2f) - Zoom: %d", lat, lon, zoom)); 
 	}
     
 	public void initializationClicked() throws IOException {
