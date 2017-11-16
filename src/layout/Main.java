@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Hashtable;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -32,6 +34,8 @@ import main.Car;
 
 import java.awt.BorderLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -70,7 +74,13 @@ public class Main{
 	private Car car3;
 	private Car car4;
 	private Car car5;
-	@FXML Pane googleMapBox = new Pane();
+	private JButton rateInfoBtn;
+	private JButton rateEditBtn;
+	private JButton impInfoBtn;
+	private JButton impEditBtn;
+	private JButton initBtn;
+	private JButton runBtn;
+	private final JXMapViewer mapViewer = new JXMapViewer();
 	
 	public Main() {
         initUI();
@@ -83,60 +93,26 @@ public class Main{
 		frame.setSize(800, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
-
-        JToolBar vertical = new JToolBar(JToolBar.VERTICAL);
-        vertical.setFloatable(false);
-        vertical.setMargin(new Insets(10, 5, 5, 5));
-
-        ImageIcon driveIcon = createImageIcon("computer.jpg","Java");
-        ImageIcon compIcon = new ImageIcon("computer.png");
-        ImageIcon printIcon = new ImageIcon("printer.png");
-        JButton driveBtn = new JButton(driveIcon);
-        driveBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
-        JButton compBtn = new JButton(compIcon);
-        compBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
-        JButton printBtn = new JButton(printIcon);
-        printBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
-
-        vertical.add(driveBtn);
-        vertical.add(compBtn);
-        vertical.add(printBtn);
-
-        frame.add(vertical, BorderLayout.WEST);
+		JPanel vertical = new JPanel(new BorderLayout());
+        JToolBar rateVertical = new JToolBar(JToolBar.VERTICAL);
+        JToolBar impVertical = new JToolBar(JToolBar.VERTICAL);
+        rateVertical.setFloatable(false);
+        rateVertical.setMargin(new Insets(10, 5, 5, 5));
+        impVertical.setFloatable(false);
+        impVertical.setMargin(new Insets(10, 5, 5, 5));
+        btnSetup();
+        mapSetup();
+        rateVertical.add(rateInfoBtn);
+        rateVertical.add(rateEditBtn);
+        rateVertical.add(runBtn);
+        impVertical.add(impInfoBtn);
+        impVertical.add(impEditBtn);
+        impVertical.add(initBtn);
+//        vertical.add(printBtn);
         
-        TileFactoryInfo info = new OSMTileFactoryInfo();
-		DefaultTileFactory tileFactory = new DefaultTileFactory(info);
-		tileFactory.setThreadPoolSize(8);
-
-		// Setup local file cache
-		File cacheDir = new File(System.getProperty("user.home") + File.separator + ".jxmapviewer2");
-		LocalResponseCache.installResponseCache(info.getBaseURL(), cacheDir, false);
-
-		// Setup JXMapViewer
-		final JXMapViewer mapViewer = new JXMapViewer();
-		mapViewer.setTileFactory(tileFactory);
-
-		GeoPosition bachkhoa = new GeoPosition(21.00, 105.84);
-
-		// Set the focus
-		mapViewer.setZoom(2);
-		mapViewer.setAddressLocation(bachkhoa);
-	
-		// Add interactions
-		MouseInputListener mia = new PanMouseInputListener(mapViewer);
-		mapViewer.addMouseListener(mia);
-		mapViewer.addMouseMotionListener(mia);
-		mapViewer.addMouseListener(new CenterMapListener(mapViewer));
-		mapViewer.addMouseWheelListener(new ZoomMouseWheelListenerCursor(mapViewer));
-		mapViewer.addKeyListener(new PanKeyListener(mapViewer));
-		
-		// Add a selection painter
-		SelectionAdapter sa = new SelectionAdapter(mapViewer); 
-		SelectionPainter sp = new SelectionPainter(sa); 
-		mapViewer.addMouseListener(sa); 
-		mapViewer.addMouseMotionListener(sa); 
-		mapViewer.setOverlayPainter(sp);
-		
+        vertical.add(rateVertical, BorderLayout.EAST);
+        vertical.add(impVertical, BorderLayout.WEST);
+        frame.add(vertical, BorderLayout.WEST);
 		frame.add(mapViewer, BorderLayout.CENTER);
 
         JLabel statusbar = new JLabel(" Statusbar");
@@ -162,7 +138,6 @@ public class Main{
 //		});
 //		
 //		updateWindowTitle(frame, mapViewer);
-		System.out.println(driveIcon.getIconHeight());
     }
 
     public static void main(String[] args) {
@@ -190,7 +165,119 @@ public class Main{
 		frame.setTitle(String.format("Hedge decision system (%.2f / %.2f) - Zoom: %d", lat, lon, zoom)); 
 	}
     
-	public void initializationClicked() throws IOException {
+    public void mapSetup() {
+    	TileFactoryInfo info = new OSMTileFactoryInfo();
+		DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+		tileFactory.setThreadPoolSize(8);
+
+		// Setup local file cache
+		File cacheDir = new File(System.getProperty("user.home") + File.separator + ".jxmapviewer2");
+		LocalResponseCache.installResponseCache(info.getBaseURL(), cacheDir, false);
+
+		// Setup JXMapViewer
+		
+		mapViewer.setTileFactory(tileFactory);
+
+		GeoPosition bachkhoa = new GeoPosition(21.00, 105.84);
+
+		// Set the focus
+		mapViewer.setZoom(2);
+		mapViewer.setAddressLocation(bachkhoa);
+	
+		// Add interactions
+		MouseInputListener mia = new PanMouseInputListener(mapViewer);
+		mapViewer.addMouseListener(mia);
+		mapViewer.addMouseMotionListener(mia);
+		mapViewer.addMouseListener(new CenterMapListener(mapViewer));
+		mapViewer.addMouseWheelListener(new ZoomMouseWheelListenerCursor(mapViewer));
+		mapViewer.addKeyListener(new PanKeyListener(mapViewer));
+		
+		// Add a selection painter
+		SelectionAdapter sa = new SelectionAdapter(mapViewer); 
+		SelectionPainter sp = new SelectionPainter(sa); 
+		mapViewer.addMouseListener(sa); 
+		mapViewer.addMouseMotionListener(sa); 
+		mapViewer.setOverlayPainter(sp);
+    }
+    public void btnSetup() {
+    	ImageIcon rateInfoIcon = createImageIcon("icon/rateInfo.png","Java");
+        ImageIcon rateEditIcon = createImageIcon("icon/rateEdit.png","Java");
+        ImageIcon impInfoIcon = createImageIcon("icon/impInfo.png","Java");
+        ImageIcon impEditIcon = createImageIcon("icon/impEdit.png","Java");
+        ImageIcon initIcon = createImageIcon("icon/init.png","Java");
+        ImageIcon runIcon = createImageIcon("icon/run.png","Java");
+        
+        rateInfoBtn = new JButton(rateInfoIcon);
+        rateInfoBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
+        rateEditBtn = new JButton(rateEditIcon);
+        rateEditBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
+        impInfoBtn = new JButton(impInfoIcon);
+        impInfoBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
+        impEditBtn = new JButton(impEditIcon);
+        impEditBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
+        initBtn = new JButton(initIcon);
+        initBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
+        runBtn = new JButton(runIcon);
+        runBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
+        
+    	initBtn.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		try {
+					initBtnClicked();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+        	}
+        });
+    	
+    	runBtn.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		try {
+        			runBtnClicked();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+        	}
+        });
+    	
+    	rateInfoBtn.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		rateInfoBtnClicked();
+        	}
+        });
+    	
+    	rateEditBtn.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		try {
+					initBtnClicked();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+        	}
+        });
+    	
+    	impInfoBtn.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		impInfoBtnClicked();
+        	}
+        });
+    	
+    	impEditBtn.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		try {
+					initBtnClicked();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+        	}
+        });
+    }
+    
+	public void initBtnClicked() throws IOException {
 		if(getImpHedge() == null || getRateHedge() == null) {
 			Hedge hedge1 = new Hedge(new String[] {"low","high"}, new String[] {"very"},new String[] {"little"},0.5,0.5,0.5, "M1.txt");
 			Hedge hedge2 = new Hedge(new String[] {"unimportant","important"}, new String[] {"very"},new String[] {"little"},0.65,0.35,0.4, "M1i.txt");
@@ -210,7 +297,7 @@ public class Main{
 		} else System.out.println("Already init");
 	}
 	
-	public void runClicked() throws IOException {
+	public void runBtnClicked() throws IOException {
 		if(getRateHedge() != null && getImpHedge() != null) {
 			Hedge hedge1 = getRateHedge();
 			Hedge hedge2 = getImpHedge();
@@ -324,12 +411,8 @@ public class Main{
 //		} else System.out.println("Click initalization button first");
 //	}
 //	
-	public void rateInfoClicked() {
+	public String getInfoContent(Hedge hedge) {
 		String content = null;
-		Hedge hedge = getRateHedge();
-		Alert alert = new Alert(AlertType.INFORMATION);
-		alert.setTitle("Rate Hedge Information");
-		alert.setHeaderText(null);
 		content = "Alpha: " + hedge.getAlpha() + 
 				"\nBeta: " + hedge.getBeta() + 
 				"\nTheta: " + hedge.getTheta() +
@@ -339,18 +422,23 @@ public class Main{
 				"\nHedge Sign: " + Arrays.asList(hedge.getFuzzySign()).toString() + 
 				"\nHedge Fm: " + Arrays.asList(hedge.getFuzzyHashFm()).toString() +
 				"\nHedge V: " + Arrays.asList(hedge.getFuzzyHashV()).toString();
-		alert.setContentText(content);
-		alert.showAndWait();
+		return content;
 	}
 	
-	public void impInfoClicked() {
-		Alert alert = new Alert(AlertType.INFORMATION);
-		alert.setTitle("Information Dialog");
-		alert.setHeaderText(null);
-		alert.setContentText("ImpInfo");
-
-		alert.showAndWait();
+	public void rateInfoBtnClicked() {
+		String content = null;
+		Hedge hedge = getRateHedge();
+		content = getInfoContent(hedge);
+		JOptionPane.showMessageDialog (null, content, "Rate hedge info", JOptionPane.INFORMATION_MESSAGE);
 	}
+	
+	public void impInfoBtnClicked() {
+		String content = null;
+		Hedge hedge = getImpHedge();
+		content = getInfoContent(hedge);
+		JOptionPane.showMessageDialog (null, content, "Imp hedge info", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
 	public void setupTableColumn(TableColumn<Car, String> column, int i, String colName, String[][] array, Hedge hedge) {
 		column.setCellValueFactory(new PropertyValueFactory<Car, String>(colName));
 		column.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -492,9 +580,10 @@ public class Main{
 		this.impArray[x][y] = value;
 	}
 
-	public Pane getGoogleMapBox() {
-		return googleMapBox;
+	public JButton getInitBtn() {
+		return initBtn;
 	}
+
 //	@Override
 //	public void start(Stage primaryStage) throws Exception {
 //		Parent root = FXMLLoader.load(getClass().getResource("Gr.fxml"));
@@ -525,4 +614,5 @@ public class Main{
 //	public static void main(String[] args) throws IOException {
 //		launch(args);
 //	}
+	
 }
