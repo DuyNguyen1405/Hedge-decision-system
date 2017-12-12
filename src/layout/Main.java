@@ -1,93 +1,78 @@
 package layout;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
+
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
-import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Group;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableColumn.CellEditEvent;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
+import lib.Controller;
 import lib.Hedge;
-import main.Car;
+
 
 import java.awt.BorderLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
+import java.beans.PropertyChangeEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JTextArea;
+
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.MouseInputListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
+
 import org.jxmapviewer.JXMapViewer;
-import org.jxmapviewer.OSMTileFactoryInfo;
-import org.jxmapviewer.input.CenterMapListener;
-import org.jxmapviewer.input.PanKeyListener;
-import org.jxmapviewer.input.PanMouseInputListener;
-import org.jxmapviewer.input.ZoomMouseWheelListenerCursor;
-import org.jxmapviewer.viewer.DefaultTileFactory;
-import org.jxmapviewer.viewer.GeoPosition;
-import org.jxmapviewer.viewer.LocalResponseCache;
-import org.jxmapviewer.viewer.TileFactoryInfo;
+
 
 public class Main{
 	private Hashtable<Double, String> resultHash = new Hashtable<Double, String>();
-	private Hedge impHedge;
-	private Hedge rateHedge;
-	private String[][] rateArray;
-	private String[][] impArray;
-//    private TableView<Car> impTable = new TableView<Car>();
-//    private TableView<Car> rateTable = new TableView<Car>();
-	private Car car1;
-	private Car car2;
-	private Car car3;
-	private Car car4;
-	private Car car5;
+//	private Hedge impHedge;
+//	private Hedge rateHedge;
+//	private String[][] rateArray;
+//	private String[][] impArray;
+//	private Car car1;
+//	private Car car2;
+//	private Car car3;
+//	private Car car4;
+//	private Car car5;
 	private JButton rateInfoBtn;
 	private JButton rateEditBtn;
 	private JButton impInfoBtn;
 	private JButton impEditBtn;
 	private JButton initBtn;
 	private JButton runBtn;
-	private final JXMapViewer mapViewer = new JXMapViewer();
+//	private final JXMapViewer mapViewer = new JXMapViewer();
+	
+	public static Controller controller = new Controller();
 	
 	public Main() {
         initUI();
     }
 	
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            Main ex = new Main();
+        });
+    }
+    
 	private void initUI() {
     	final JFrame frame = new JFrame();
+    	final JXMapViewer mapViewer = controller.getMapViewer();
 		frame.setLayout(new BorderLayout());
 		frame.add(new JLabel("Use left mouse button to pan, mouse wheel to zoom and right mouse to select"), BorderLayout.NORTH);
 		frame.setSize(800, 600);
@@ -101,7 +86,7 @@ public class Main{
         impVertical.setFloatable(false);
         impVertical.setMargin(new Insets(10, 5, 5, 5));
         btnSetup();
-        mapSetup();
+        controller.mapSetup();
         rateVertical.add(rateInfoBtn);
         rateVertical.add(rateEditBtn);
         rateVertical.add(runBtn);
@@ -113,40 +98,34 @@ public class Main{
         vertical.add(rateVertical, BorderLayout.EAST);
         vertical.add(impVertical, BorderLayout.WEST);
         frame.add(vertical, BorderLayout.WEST);
-		frame.add(mapViewer, BorderLayout.CENTER);
+		frame.add(controller.getMapViewer(), BorderLayout.CENTER);
 
         JLabel statusbar = new JLabel(" Statusbar");
         frame.add(statusbar, BorderLayout.SOUTH);
-        frame.setTitle("Hedge decision system"); 
-//        
-//        mapViewer.addPropertyChangeListener("zoom", new PropertyChangeListener()
-//		{
-//			@Override
-//			public void propertyChange(PropertyChangeEvent evt)
-//			{
-//				updateWindowTitle(frame, mapViewer);
-//			}
-//		});
-//		
-//		mapViewer.addPropertyChangeListener("center", new PropertyChangeListener()
-//		{
-//			@Override
-//			public void propertyChange(PropertyChangeEvent evt)
-//			{
-//				updateWindowTitle(frame, mapViewer);
-//			}
-//		});
-//		
-//		updateWindowTitle(frame, mapViewer);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            Main ex = new Main();
-        });
+//        frame.setTitle("Hedge decision system"); 
+        
+        controller.getMapViewer().addPropertyChangeListener("zoom", new PropertyChangeListener()
+		{
+			@Override
+			public void propertyChange(PropertyChangeEvent evt)
+			{
+				controller.updateWindowTitle(frame, mapViewer);
+			}
+		});
+		
+		mapViewer.addPropertyChangeListener("center", new PropertyChangeListener()
+		{
+			@Override
+			public void propertyChange(PropertyChangeEvent evt)
+			{
+				controller.updateWindowTitle(frame, mapViewer);
+			}
+		});
+		
+		controller.updateWindowTitle(frame, mapViewer);
     }
     
-    private static ImageIcon createImageIcon(String path, String description) {
+	private static ImageIcon createImageIcon(String path, String description) {
         java.net.URL imgURL = Main.class.getResource(path);
         
         if (imgURL != null) {
@@ -156,49 +135,7 @@ public class Main{
            return null;
         }
      }
-    
-    protected static void updateWindowTitle(JFrame frame, JXMapViewer mapViewer)
-	{
-		double lat = mapViewer.getCenterPosition().getLatitude();
-		double lon = mapViewer.getCenterPosition().getLongitude();
-		int zoom = mapViewer.getZoom();
-		frame.setTitle(String.format("Hedge decision system (%.2f / %.2f) - Zoom: %d", lat, lon, zoom)); 
-	}
-    
-    public void mapSetup() {
-    	TileFactoryInfo info = new OSMTileFactoryInfo();
-		DefaultTileFactory tileFactory = new DefaultTileFactory(info);
-		tileFactory.setThreadPoolSize(8);
-
-		// Setup local file cache
-		File cacheDir = new File(System.getProperty("user.home") + File.separator + ".jxmapviewer2");
-		LocalResponseCache.installResponseCache(info.getBaseURL(), cacheDir, false);
-
-		// Setup JXMapViewer
-		
-		mapViewer.setTileFactory(tileFactory);
-
-		GeoPosition bachkhoa = new GeoPosition(21.00, 105.84);
-
-		// Set the focus
-		mapViewer.setZoom(2);
-		mapViewer.setAddressLocation(bachkhoa);
 	
-		// Add interactions
-		MouseInputListener mia = new PanMouseInputListener(mapViewer);
-		mapViewer.addMouseListener(mia);
-		mapViewer.addMouseMotionListener(mia);
-		mapViewer.addMouseListener(new CenterMapListener(mapViewer));
-		mapViewer.addMouseWheelListener(new ZoomMouseWheelListenerCursor(mapViewer));
-		mapViewer.addKeyListener(new PanKeyListener(mapViewer));
-		
-		// Add a selection painter
-		SelectionAdapter sa = new SelectionAdapter(mapViewer); 
-		SelectionPainter sp = new SelectionPainter(sa); 
-		mapViewer.addMouseListener(sa); 
-		mapViewer.addMouseMotionListener(sa); 
-		mapViewer.setOverlayPainter(sp);
-    }
     public void btnSetup() {
     	ImageIcon rateInfoIcon = createImageIcon("icon/rateInfo.png","Java");
         ImageIcon rateEditIcon = createImageIcon("icon/rateEdit.png","Java");
@@ -209,16 +146,22 @@ public class Main{
         
         rateInfoBtn = new JButton(rateInfoIcon);
         rateInfoBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
+        rateInfoBtn.setToolTipText("Show component value of Rate Hedge");
         rateEditBtn = new JButton(rateEditIcon);
         rateEditBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
+        rateEditBtn.setToolTipText("Edit rate table");
         impInfoBtn = new JButton(impInfoIcon);
         impInfoBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
+        impInfoBtn.setToolTipText("Show component value of Imp Hedge");
         impEditBtn = new JButton(impEditIcon);
         impEditBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
+        impEditBtn.setToolTipText("Edit imp table");
         initBtn = new JButton(initIcon);
         initBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
+        initBtn.setToolTipText("Create/Reset default value");
         runBtn = new JButton(runIcon);
         runBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
+        runBtn.setToolTipText("Make decision");
         
     	initBtn.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
@@ -250,12 +193,7 @@ public class Main{
     	
     	rateEditBtn.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
-        		try {
-					initBtnClicked();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+        		rateEditBtnClicked();
         	}
         });
     	
@@ -278,33 +216,65 @@ public class Main{
     }
     
 	public void initBtnClicked() throws IOException {
-		if(getImpHedge() == null || getRateHedge() == null) {
-			Hedge hedge1 = new Hedge(new String[] {"low","high"}, new String[] {"very"},new String[] {"little"},0.5,0.5,0.5, "M1.txt");
-			Hedge hedge2 = new Hedge(new String[] {"unimportant","important"}, new String[] {"very"},new String[] {"little"},0.65,0.35,0.4, "M1i.txt");
-			setImpHedge(hedge2);
-			setRateHedge(hedge1);
-			String[][] rateArray = rateHedge.getWords();
-			String[][] impArray = impHedge.getWords();
-			System.out.println(checkValidHedge("abc",hedge1));
-			System.out.println(checkValidHedge("very low",hedge1));
-			System.out.println(checkValidHedge("very important", hedge2));
-			System.out.println(checkValidHedge("very low",hedge2));
-		    car1 = new Car(rateArray[1][0], rateArray[1][1], rateArray[1][2], rateArray[1][3], rateArray[1][4], impArray[1][1],impArray[1][2],impArray[1][3],impArray[1][4],0.0);
-			car2 = new Car(rateArray[2][0], rateArray[2][1], rateArray[2][2], rateArray[2][3], rateArray[2][4], impArray[2][1],impArray[2][2],impArray[2][3],impArray[2][4],0.0);
-			car3 = new Car(rateArray[3][0], rateArray[3][1], rateArray[3][2], rateArray[3][3], rateArray[3][4], impArray[3][1],impArray[3][2],impArray[3][3],impArray[3][4],0.0);
-			car4 = new Car(rateArray[4][0], rateArray[4][1], rateArray[4][2], rateArray[4][3], rateArray[4][4], impArray[4][1],impArray[4][2],impArray[4][3],impArray[4][4],0.0);
-			car5 = new Car(rateArray[5][0], rateArray[5][1], rateArray[5][2], rateArray[5][3], rateArray[5][4], impArray[5][1],impArray[5][2],impArray[5][3],impArray[5][4],0.0);
-		} else System.out.println("Already init");
+	    GridTable frame = new GridTable();
+	    frame.addWindowListener(new WindowAdapter() {
+	      public void windowClosing(WindowEvent e) {
+//	        System.exit(0);
+
+	      }
+	    });
+//        if(controller.getImpHedge() == null || controller.getRateHedge() == null) {
+//			JOptionPane.showMessageDialog (null, "Create default data", null, JOptionPane.INFORMATION_MESSAGE);
+//		} else JOptionPane.showMessageDialog (null, "Reset default data", null, JOptionPane.INFORMATION_MESSAGE);
+//		try {
+//			controller.initHedge(fileName);
+//		} catch (IOException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+	}
+	
+	public void rateEditBtnClicked() {
+		if(controller.getRateHedge() != null && controller.getImpHedge() != null) {
+			String[][] rowData = new String[6][5];
+			for (int r = 0; r < 6; r++) {
+				rowData[r] = controller.getRateArray()[r].clone();
+			}
+			final String columnNames[] = rowData[0];
+			List<String[]> l = new ArrayList<String[]>(Arrays.asList(rowData));
+			l.remove(0);
+			rowData = l.toArray(new String[][] {});
+			final JTable table = new JTable(rowData, columnNames);
+			JScrollPane scrollPane = new JScrollPane(table);
+
+			table.getModel().addTableModelListener(new TableModelListener() {
+				public void tableChanged(TableModelEvent e) {
+					int x = e.getFirstRow();
+					int y = e.getColumn();
+					String oldValue = new String(controller.getRateArray()[x + 1][y]);
+					if (controller.checkValidHedge((String) table.getValueAt(x, y), controller.getRateHedge()) == 1) {
+						System.out.println(controller.getRateArray()[x + 1][y]);
+					} else {
+						table.setValueAt(oldValue, x, y);
+						JOptionPane.showMessageDialog(null, "Invalid input", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			});
+			JFrame frame = new JFrame("Rate hedge edit");
+			frame.add(scrollPane, BorderLayout.CENTER);
+			frame.setSize(700, 150);
+			frame.setVisible(true);
+		} else JOptionPane.showMessageDialog (null, "Click init button first", null, JOptionPane.INFORMATION_MESSAGE);
 	}
 	
 	public void runBtnClicked() throws IOException {
-		if(getRateHedge() != null && getImpHedge() != null) {
-			Hedge hedge1 = getRateHedge();
-			Hedge hedge2 = getImpHedge();
+		if(controller.getRateHedge() != null && controller.getImpHedge() != null) {
+			Hedge hedge1 = controller.getRateHedge();
+			Hedge hedge2 = controller.getImpHedge();
 			double[] result = null;
 			String orderList = "";
 			String order = "";
-			result = hedgeDecision(hedge1,hedge2,resultHash);
+			result = controller.hedgeDecision(hedge1,hedge2,resultHash);
 			Arrays.sort(result);
 			for(int i = result.length-1; i > 0; i--) {
 				orderList += (resultHash.get(result[i]) + ": " + result[i]);
@@ -313,8 +283,60 @@ public class Main{
 				if (i > 1) order += " > ";
 			}
 			JOptionPane.showMessageDialog (null, orderList + "\n" + order, "Hedge result", JOptionPane.INFORMATION_MESSAGE);
-		} else System.out.println("Click initalization button first");
+		} else JOptionPane.showMessageDialog (null, "Click init button first", null, JOptionPane.INFORMATION_MESSAGE);
 	}
+
+	public void rateInfoBtnClicked() {
+		if(controller.getRateHedge() != null) {
+			String content = null;
+			Hedge hedge = controller.getRateHedge();
+			content = controller.getInfoContent(hedge);
+			JOptionPane.showMessageDialog (null, content, "Rate hedge info", JOptionPane.INFORMATION_MESSAGE);
+		} else JOptionPane.showMessageDialog (null, "Click init button first", null, JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	public void impInfoBtnClicked() {
+		String content = null;
+		Hedge hedge = controller.getImpHedge();
+		content = controller.getInfoContent(hedge);
+		JOptionPane.showMessageDialog (null, content, "Imp hedge info", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+//	public void setupTableColumn(TableColumn<Car, String> column, int i, String colName, String[][] array, Hedge hedge) {
+//		column.setCellValueFactory(new PropertyValueFactory<Car, String>(colName));
+//		column.setCellFactory(TextFieldTableCell.forTableColumn());
+//		column.setOnEditCommit(
+//            new EventHandler<CellEditEvent<Car, String>>() {
+//                @Override
+//                public void handle(CellEditEvent<Car, String> t) {
+//                	if(checkValidHedge(t.getNewValue(), hedge) == 1 ){
+//                		Car car = (Car) t.getTableView().getItems().get(t.getTablePosition().getRow());
+//                		String newValue = t.getNewValue();
+//                    	switch(colName) {
+//                    		case "w1":  car.setW1(newValue);
+//                    		case "w2":  car.setW2(newValue);
+//                    		case "w3":  car.setW3(newValue);
+//                    		case "w4":  car.setW4(newValue);
+//                    		case "q1":  car.setQ1(newValue);
+//                    		case "q2":  car.setQ2(newValue);
+//                    		case "q3":  car.setQ3(newValue);
+//                    		case "q4":  car.setQ4(newValue);
+//                    	}
+//                	}else {
+//                		Alert alert = new Alert(AlertType.WARNING);
+//                		alert.setTitle("Warning Dialog");
+//                		alert.setHeaderText(null);
+//                		alert.setContentText("Please enter a valid input");
+//                		alert.showAndWait();
+//                	}
+//                    array[(t.getTablePosition().getRow())+1][i] = t.getNewValue();
+//                }
+//            }
+//        );
+//	}
+	
+	
+	
 //	
 //	public void rateHedgeEdit() {
 //		if(getRateHedge() != null && getImpHedge() != null) {
@@ -360,7 +382,7 @@ public class Main{
 //			} catch(Exception e) {
 //		        e.printStackTrace();
 //		     }
-//		} else System.out.println("Click initalization button first");
+//		} else System.out.println("Click init button first");
 //	}
 //	
 //	public void impHedgeEdit() {
@@ -408,182 +430,9 @@ public class Main{
 //			} catch(Exception e) {
 //		        e.printStackTrace();
 //		     }
-//		} else System.out.println("Click initalization button first");
+//		} else System.out.println("Click init button first");
 //	}
 //	
-	public String getInfoContent(Hedge hedge) {
-		String content = null;
-		content = "Alpha: " + hedge.getAlpha() + 
-				"\nBeta: " + hedge.getBeta() + 
-				"\nTheta: " + hedge.getTheta() +
-				"\nBase Hedge: " + Arrays.asList(hedge.getBaseG()).toString() +
-				"\nPositive Hedge: " + Arrays.asList(hedge.getPositiveHedgeH()).toString() +
-				"\nNagative Hedge: " + Arrays.asList(hedge.getNegativeHedgeH()).toString() +
-				"\nHedge Sign: " + Arrays.asList(hedge.getFuzzySign()).toString() + 
-				"\nHedge Fm: " + Arrays.asList(hedge.getFuzzyHashFm()).toString() +
-				"\nHedge V: " + Arrays.asList(hedge.getFuzzyHashV()).toString();
-		return content;
-	}
-	
-	public void rateInfoBtnClicked() {
-		String content = null;
-		Hedge hedge = getRateHedge();
-		content = getInfoContent(hedge);
-		JOptionPane.showMessageDialog (null, content, "Rate hedge info", JOptionPane.INFORMATION_MESSAGE);
-	}
-	
-	public void impInfoBtnClicked() {
-		String content = null;
-		Hedge hedge = getImpHedge();
-		content = getInfoContent(hedge);
-		JOptionPane.showMessageDialog (null, content, "Imp hedge info", JOptionPane.INFORMATION_MESSAGE);
-	}
-	
-	public void setupTableColumn(TableColumn<Car, String> column, int i, String colName, String[][] array, Hedge hedge) {
-		column.setCellValueFactory(new PropertyValueFactory<Car, String>(colName));
-		column.setCellFactory(TextFieldTableCell.forTableColumn());
-		column.setOnEditCommit(
-            new EventHandler<CellEditEvent<Car, String>>() {
-                @Override
-                public void handle(CellEditEvent<Car, String> t) {
-                	if(checkValidHedge(t.getNewValue(), hedge) == 1 ){
-                		Car car = (Car) t.getTableView().getItems().get(t.getTablePosition().getRow());
-                		String newValue = t.getNewValue();
-                    	switch(colName) {
-                    		case "w1":  car.setW1(newValue);
-                    		case "w2":  car.setW2(newValue);
-                    		case "w3":  car.setW3(newValue);
-                    		case "w4":  car.setW4(newValue);
-                    		case "q1":  car.setQ1(newValue);
-                    		case "q2":  car.setQ2(newValue);
-                    		case "q3":  car.setQ3(newValue);
-                    		case "q4":  car.setQ4(newValue);
-                    	}
-                	}else {
-                		Alert alert = new Alert(AlertType.WARNING);
-                		alert.setTitle("Warning Dialog");
-                		alert.setHeaderText(null);
-                		alert.setContentText("Please enter a valid input");
-                		alert.showAndWait();
-                	}
-                    array[(t.getTablePosition().getRow())+1][i] = t.getNewValue();
-                }
-            }
-        );
-	}
-	
-	public int checkValidHedge(String hedgeString, Hedge hedge) {
-		int valid = 1;
-		String[] array = hedgeString.split(" ");
-		if(!Arrays.asList(hedge.getBaseG()).contains(array[array.length-1])) {
-			valid = 0;
-			return valid;
-		}
-		for(int i = 0; i < array.length-1; i++) {
-			if((!Arrays.asList(hedge.getPositiveHedgeH()).contains(array[i])) && (!Arrays.asList(hedge.getNegativeHedgeH()).contains(array[i]))) {
-				valid = 0;
-				break;
-			}
-		}
-		return valid;
-	}
-	
-	public void makeTestCase(Hedge hedge) {
-		System.out.println("Car name: " + hedge.getCarName(1));
-		System.out.println("Car importance: " + Arrays.toString(hedge.getCarImportance(1)));
-		System.out.println("BaseG: " + Arrays.toString(hedge.getBaseG()));
-		System.out.println("FmBaseG[0]: " + hedge.getFuzzyHashFm().get(hedge.getBaseG()[0]));
-		System.out.println("Alpha: " + hedge.getAlpha());
-		System.out.println("Beta: " + hedge.getBeta());
-		
-		String countSpaceTest = hedge.getPositiveHedgeH()[0] + " " + hedge.getNegativeHedgeH()[0] + " " + hedge.getBaseG()[0];
-		System.out.println("Count space: " + hedge.countSpace(countSpaceTest));
-		
-		String stringTest1 = hedge.getPositiveHedgeH()[0] + " " + hedge.getBaseG()[0];
-		String stringTest2 = hedge.getNegativeHedgeH()[0] + " " + hedge.getBaseG()[1];
-		System.out.println("Fuzzy compare " + stringTest1 + " + " + stringTest2 + ": "+ hedge.fuzzyCompare(stringTest1,stringTest2));
-		System.out.println("Word count: " + hedge.getWordCount());
-		System.out.println("Fuzzy sign: " + hedge.getFuzzySign());
-		System.out.println("FuzzyHashFM: " + hedge.getFuzzyHashFm());
-		System.out.println("FuzzyHashV: " + hedge.getFuzzyHashV());
-		
-		String stringTest3 = hedge.getPositiveHedgeH()[0] + " " + hedge.getBaseG()[1];
-		String stringTest4 = hedge.getPositiveHedgeH()[0] + " " + hedge.getNegativeHedgeH()[0] + " " + hedge.getBaseG()[0];
-		hedge.calculateV(stringTest1);
-		hedge.calculateV(stringTest2);
-		hedge.calculateV(stringTest3);
-		hedge.calculateV(stringTest4);
-		
-		String falseTest = "abcxzuixc";
-		hedge.calculateV(falseTest);
-	}
-	
-	public double[] hedgeDecision(Hedge hedge1, Hedge hedge2, Hashtable<Double, String> resultHash) {
-		double[] result = {0,0,0,0,0,0};
-		for(int i = 1; i < 6; i++) {
-			String[] importanceArray1 = hedge1.getCarImportance(i);
-			String[] importanceArray2 = hedge2.getCarImportance(i);
-			double tmp1 = 0.0;
-			double tmp2 = 0.0;
-//			System.out.println(Arrays.toString(importanceArray1));
-//			System.out.println(Arrays.toString(importanceArray2));
-			for(int j = 0; j < 4; j++) {
-				tmp1 = hedge1.getFuzzyHashV().get(importanceArray1[j]);
-				tmp2 = hedge2.getFuzzyHashV().get(importanceArray2[j]);
-//				System.out.println(tmp1 + " " + tmp2);
-				result[i] += tmp1 * tmp2;
-//				System.out.println((hedge1.getFuzzyHashV().get(importanceArray1[j]))*(hedge2.getFuzzyHashV().get(importanceArray2[j])));
-//				System.out.println(hedge1.getFuzzyHashV().get(importanceArray1[j]));
-//				System.out.println(hedge2.getFuzzyHashV().get(importanceArray2[j]));
-				
-			}
-			result[i] = Math.round(result[i]*10000);
-			result[i] = result[i]/10000;
-//			System.out.println(result[i]);
-			resultHash.put(result[i],hedge1.getCarName(i));
-		}
-		return result;
-	}
-	
-	public Hashtable<Double, String> getResultHash() {
-		return resultHash;
-	}
-	public void setResultHash(Hashtable<Double, String> resultHash) {
-		this.resultHash = resultHash;
-	}
-	public Hedge getImpHedge() {
-		return impHedge;
-	}
-	public void setImpHedge(Hedge impHedge) {
-		this.impHedge = impHedge;
-	}
-	public Hedge getRateHedge() {
-		return rateHedge;
-	}
-	public void setRateHedge(Hedge rateHedge) {
-		this.rateHedge = rateHedge;
-	}
-
-	public String[][] getRateArray() {
-		return this.getRateHedge().getWords();
-	}
-
-	public void setRateArray(String value, int x, int y) {
-		this.rateArray[x][y] = value;
-	}
-
-	public String[][] getImpArray() {
-		return this.getImpHedge().getWords();
-	}
-
-	public void setImpArray(String value, int x, int y) {
-		this.impArray[x][y] = value;
-	}
-
-	public JButton getInitBtn() {
-		return initBtn;
-	}
-
 //	@Override
 //	public void start(Stage primaryStage) throws Exception {
 //		Parent root = FXMLLoader.load(getClass().getResource("Gr.fxml"));

@@ -3,8 +3,6 @@ package lib;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -127,6 +125,10 @@ public class Hedge {
 	
 	public String makeCompareString(String[] arr) {
 		String compareString = "";
+//		System.out.println(arr.length);
+		if (arr.length == 1) {
+			return compareString;
+		}
 		for(int j = 1; j < arr.length; j++) {
 			if(j != 1) compareString = compareString + " " + arr[j];
 			else compareString += arr[j];
@@ -141,20 +143,22 @@ public class Hedge {
 		double comp2 = 0;
 		double result = 0;
 		arr = key.split(" ");
-		compareString = makeCompareString(arr);
-		comp1 = fuzzyHashMu.get(arr[0]);
-		comp2 = fuzzyHashFm.get(compareString);
-		result = comp1 * comp2;
-		result = Math.round(result*10000);
-		result = result/10000;
-		fuzzyHashFm.put(key, result);
-		System.out.println("Fm " + key + ": " + result);
+		if(arr.length != 1) {
+			compareString = makeCompareString(arr);
+			comp1 = fuzzyHashMu.get(arr[0]);
+			comp2 = fuzzyHashFm.get(compareString);
+			result = comp1 * comp2;
+			result = Math.round(result*10000);
+			result = result/10000;
+			fuzzyHashFm.put(key, result);
+		}
 	}
 	
 	public void calculateHedgeFm(String key) {
 		String compareString = "";
 		String[] arr = key.split(" ");
-		compareString = makeCompareString(arr);
+		if(arr.length == 1) compareString = arr[0];
+		else compareString = makeCompareString(arr);
 		if (Arrays.asList(baseG).contains(arr[arr.length-1]) && !compareString.isEmpty()){
 			if(fuzzyHashFm.containsKey(compareString)) setHedgeFm(key);
 			else {
@@ -210,27 +214,30 @@ public class Hedge {
 		String[] arr = null;
 		w = calculateW(key);
 		arr = key.split(" ");
-		compareString = makeCompareString(arr);
+		if(arr.length == 1) compareString = arr[0];
+		else compareString = makeCompareString(arr);
 		result = Math.round((fuzzyHashV.get(compareString) + fuzzySign.get(key)*(1-w)*fuzzyHashFm.get(key))*10000);
 		result = result/10000;
 		fuzzyHashV.put(key, result);
-		System.out.println("V " + key + ": " + result);
+//		System.out.println("V " + key + ": " + result);
 	}
 	
 	public void calculateV(String key) {
 		String compareString = "";
 		String[] arr = key.split(" ");
-		compareString = makeCompareString(arr);
-		if (Arrays.asList(baseG).contains(arr[arr.length-1]) && !compareString.isEmpty()) {
-			if(fuzzyHashV.containsKey(compareString) && fuzzySign.containsKey(key) && fuzzyHashFm.containsKey(key)) setV(key);
-			else {
-				calculateV(compareString);
-				setSign(key);
-				calculateHedgeFm(key);
-				setV(key);
-			}
-		} else System.out.println("Key: " + key + " is invalid");
-
+		if(arr.length != 1) {
+			compareString = makeCompareString(arr);
+			if (Arrays.asList(baseG).contains(arr[arr.length-1]) && !compareString.isEmpty()) {
+				if(fuzzyHashV.containsKey(compareString) && fuzzySign.containsKey(key) && fuzzyHashFm.containsKey(key)) setV(key);
+				else {
+					calculateV(compareString);
+					setSign(key);
+					calculateHedgeFm(key);
+					setV(key);
+				}
+			} else System.out.println("V key: " + key + " is invalid");
+		}
+//		System.out.println(compareString + " " + key);
 	}
 	
 	public void setHash(String type) {
@@ -281,7 +288,11 @@ public class Hedge {
 		}
 		this.alpha = result;
 	}
-
+	
+	public void setAlphaValue(double value) {
+		this.alpha = value;
+	}
+	
 	public double getBeta() {
 		return beta;
 	}
