@@ -82,7 +82,6 @@ public class Main{
         JToolBar rateVertical = new JToolBar(JToolBar.VERTICAL);
         JToolBar impVertical = new JToolBar(JToolBar.VERTICAL);
         frame.setLayout(new BorderLayout());
-		frame.add(new JLabel("Use left mouse button to pan, mouse wheel to zoom and right mouse to select"), BorderLayout.NORTH);
 		frame.setSize(800, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
@@ -105,8 +104,7 @@ public class Main{
         vertical.add(impVertical, BorderLayout.WEST);
         frame.add(vertical, BorderLayout.WEST);
 		frame.add(controller.getMapViewer(), BorderLayout.CENTER);
-		frame.add(routeBtn,BorderLayout.SOUTH);
-		
+		frame.add(routeBtn,BorderLayout.SOUTH);		
     }
     
 	public void addPropertyChange(JFrame frame, JXMapViewer mapViewer) {
@@ -167,7 +165,7 @@ public class Main{
         runBtn = new JButton(runIcon);
         runBtn.setBorder(new EmptyBorder(3, 0, 3, 0));
         runBtn.setToolTipText("Make decision");
-        routeBtn = new JButton("abc");
+        routeBtn = new JButton("Draw route on map");
 	  	
     	initBtn.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
@@ -228,11 +226,14 @@ public class Main{
     
     public void routeBtnClicked(Graph g, List<Painter<JXMapViewer>> painters,JXMapViewer mapViewer) {
 		g.dijkstra(controller.getStart());
-	      	List<GeoPosition> track = controller.createTrack(g.printPath(controller.getEnd()));
-	      	final RoutePainter routePainter = new RoutePainter(track);
-		painters.add(routePainter);
-		CompoundPainter<JXMapViewer> painter = new CompoundPainter<JXMapViewer>(painters);
-		mapViewer.setOverlayPainter(painter);
+		List<String> paths = g.printAllPaths();
+		for(String path: paths) {
+			List<GeoPosition> track = controller.createTrack(path);
+			final RoutePainter routePainter = new RoutePainter(track);
+			painters.add(routePainter);
+			CompoundPainter<JXMapViewer> painter = new CompoundPainter<JXMapViewer>(painters);
+			mapViewer.setOverlayPainter(painter);
+		}
 	}
     
 	public void initBtnClicked() throws IOException {

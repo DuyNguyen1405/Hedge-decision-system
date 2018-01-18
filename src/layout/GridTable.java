@@ -23,7 +23,7 @@ import javax.swing.table.TableCellRenderer;
 public class GridTable extends JFrame {
 
   public GridTable() {
-    super("JButtonTable Example");
+    super("Select one map");
 
     DefaultTableModel dm = new DefaultTableModel();
     dm.setDataVector(new Object[][] { { "M1", "Wildfire" },

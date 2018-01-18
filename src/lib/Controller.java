@@ -60,20 +60,22 @@ public class Controller {
 	private JTable impTable;
 	private final JXMapKit jXMapKit = new JXMapKit();
 	private final JXMapViewer mapViewer = jXMapKit.getMainMap();
+	private static final double R = 6372.8;
 	private static final String START = "D";
 	private static final String END = "V";
 	private static Set<MyWaypoint> waypoints = null;
 	private final Edge[] GRAPH = {
-		      new Edge("D", "V", 70),
-		      new Edge("D", "T2", 9),
-		      new Edge("T2", "T1", 14),
-		      new Edge("T1", "V", 20)
+		      new Edge("D", "V", 70), new Edge("D", "2", 9), new Edge("2", "1", 14), new Edge("1", "V", 20),
+		      new Edge("D", "M", 10), new Edge("D","3",6), new Edge("3", "M",1),
+		      new Edge("D", "W", 10),
+		      new Edge("D", "Z", 10),
+		      new Edge("D", "O", 10)
 		   };
 	private final Graph g = new Graph(GRAPH);
 	private final List<Painter<JXMapViewer>> painters = new ArrayList<Painter<JXMapViewer>>();
 	public void initHedge(String fileName) throws IOException {
-		String rateFileName = "src/lib/map/" + fileName + ".txt";
-		String impFileName =   "src/lib/map/" + fileName + "i.txt";
+		String rateFileName = "src/lib/Map/" + fileName + ".txt";
+		String impFileName =   "src/lib/Map/" + fileName + "i.txt";
 //		String rateFileName = rateFilePath.replace("\\", "/");
 //		String impFileName = impFilePath.replace("\\", "/");
 		Hedge hedge1 = new Hedge(new String[] {"low","high"}, new String[] {"very"},new String[] {"little"},0.5,0.5,0.5, rateFileName);
@@ -110,6 +112,7 @@ public class Controller {
 		GeoPosition s5 = new GeoPosition(20.981, 105.841120);
 		GeoPosition t1 = new GeoPosition(20.9931, 105.841120);
 		GeoPosition t2 = new GeoPosition(20.9959, 105.842750);
+		GeoPosition t3 = new GeoPosition(21.0016, 105.825);
 		
 		MyWaypoint destination = new MyWaypoint("D", Color.ORANGE, bachkhoa);
 		MyWaypoint w1 = new MyWaypoint("W", Color.CYAN, s1);
@@ -117,8 +120,9 @@ public class Controller {
 		MyWaypoint w3 = new MyWaypoint("Z", Color.MAGENTA, s3);
 		MyWaypoint w4 = new MyWaypoint("O", Color.GREEN, s4);
 		MyWaypoint w5 = new MyWaypoint("V", Color.YELLOW, s5);
-		MyWaypoint wt1 = new MyWaypoint("T1", Color.WHITE, t1);
-		MyWaypoint wt2 = new MyWaypoint("T2", Color.WHITE, t2);
+		MyWaypoint wt1 = new MyWaypoint("1", Color.WHITE, t1);
+		MyWaypoint wt2 = new MyWaypoint("2", Color.WHITE, t2);
+		MyWaypoint wt3 = new MyWaypoint("3", Color.WHITE, t3);
 		
 		mapViewer.setZoom(1);
 		mapViewer.setAddressLocation(bachkhoa);
@@ -130,7 +134,7 @@ public class Controller {
 //		mapViewer.addMouseWheelListener(new ZoomMouseWheelListenerCursor(mapViewer));
 		mapViewer.addKeyListener(new PanKeyListener(mapViewer));
 		
-		waypoints = new HashSet<MyWaypoint>(Arrays.asList(destination,w1, w2, w3, w4, w5,wt1,wt2));
+		waypoints = new HashSet<MyWaypoint>(Arrays.asList(destination,w1, w2, w3, w4, w5,wt1,wt2,wt3));
 		// Create a waypoint painter that takes all the waypoints
 		final WaypointPainter<MyWaypoint> waypointPainter = new WaypointPainter<MyWaypoint>();
 		waypointPainter.setWaypoints(waypoints);
@@ -144,26 +148,19 @@ public class Controller {
 		mapViewer.setOverlayPainter(painter);
 	}
 	
-	private static double distance(GeoPosition pos1, GeoPosition pos2) {
+	public static double distance(GeoPosition pos1, GeoPosition pos2) {
 		double lon1 = pos1.getLongitude();
 		double lon2 = pos2.getLongitude();
 		double lat1 = pos1.getLatitude();
 		double lat2 = pos2.getLatitude();
-		
-		double theta = lon1 - lon2;
-		double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
-		dist = Math.acos(dist);
-		dist = rad2deg(dist);
-		dist = dist * 60 * 1.1515* 1.609344;
-		return (dist);
-	}
-	
-	private static double deg2rad(double deg) {
-		return (deg * Math.PI / 180.0);
-	}
-	
-	private static double rad2deg(double rad) {
-		return (rad * 180 / Math.PI);
+		double dLat = Math.toRadians(lat2 - lat1);
+	    double dLon = Math.toRadians(lon2 - lon1);
+	    lat1 = Math.toRadians(lat1);
+	    lat2 = Math.toRadians(lat2);
+
+	    double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+	    double c = 2 * Math.asin(Math.sqrt(a));
+	    return R * c;
 	}
 	
 	public static MyWaypoint findWaypoint(String label) {
@@ -182,7 +179,7 @@ public class Controller {
 	      if(p.getLabel().equals(label)) {
 	//     	 System.out.println(p.getPosition());
 	     	 position = p.getPosition();
-	     	 p.setLabel(findWaypoint(START).getLabel());
+//	     	 p.setLabel(findWaypoint(START).getLabel());
 	      }
 	   }
 		return position;
