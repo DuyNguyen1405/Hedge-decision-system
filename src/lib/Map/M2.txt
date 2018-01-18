@@ -1,0 +1,6 @@
+Tên xe,Q1,Q2,Q3,Q4
+D1,very high,very low,little very low,low
+D2,high,very low,high,little low
+D3,very low,little very low,little high,low
+D4,very high,little little high,little low,little low
+D5,high,little very low,little very low,very high

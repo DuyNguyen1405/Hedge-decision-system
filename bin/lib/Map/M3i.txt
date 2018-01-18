@@ -1,0 +1,6 @@
+ ,Q1,Q2,Q3,Q4
+S1,important,important,unimportant,very important
+S2,unimportant,unimportant,important,unimportant
+S3,unimportant,unimportant,unimportant,little unimportant
+S4,little important,little important,very unimportant,little important
+S5,little important,little important,very important,very unimportant

@@ -1,9 +1,12 @@
 package lib;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
+
 
 
 public class Graph {
@@ -20,7 +23,7 @@ public class Graph {
 	      //another pass to set neighbouring vertices
 	      for (Edge e : edges) {
 	         graph.get(e.v1).neighbours.put(graph.get(e.v2), e.dist);
-	         //graph.get(e.v2).neighbours.put(graph.get(e.v1), e.dist); // also do this for an undirected graph
+	         graph.get(e.v2).neighbours.put(graph.get(e.v1), e.dist); 
 	      }
 	   }
 	 
@@ -77,10 +80,14 @@ public class Graph {
 	      return graph.get(endName).printPath();
 	   }
 	   /** Prints the path from the source to every vertex (output order is not guaranteed) */
-	   public void printAllPaths() {
-	      for (Vertex v : graph.values()) {
-	         System.out.println(v.printPath());
-	      }
-	      System.out.println(graph);
+	   public List<String> printAllPaths() {
+		   List<String> paths = new ArrayList<String>();
+		   for (Vertex v : graph.values()) {
+			   if(!v.name.contains("T")) {
+				   paths.add(new StringBuilder(v.printPath()).reverse().toString());
+			   }
+//			   paths.add(v.printPath());
+		   }
+		   return paths;   
 	   }
 	}
