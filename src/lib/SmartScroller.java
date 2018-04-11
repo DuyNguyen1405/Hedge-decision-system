@@ -1,11 +1,12 @@
-package test;
+package lib;
+
 import java.awt.Component;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.text.*;
 
 /**
- *  The test will attempt to keep the viewport positioned based on
+ *  The SmartScroller will attempt to keep the viewport positioned based on
  *  the users interaction with the scrollbar. The normal behaviour is to keep
  *  the viewport positioned to see new data as it is dynamically added.
  *
@@ -25,7 +26,7 @@ import javax.swing.text.*;
  *
  *  Similiar logic would apply for horizontal scrolling.
  */
-public class test implements AdjustmentListener
+public class SmartScroller implements AdjustmentListener
 {
 	public final static int HORIZONTAL = 0;
 	public final static int VERTICAL = 1;
@@ -47,7 +48,7 @@ public class test implements AdjustmentListener
 	 *
 	 *  @param scrollPane the scroll pane to monitor
 	 */
-	public test(JScrollPane scrollPane)
+	public SmartScroller(JScrollPane scrollPane)
 	{
 		this(scrollPane, VERTICAL, END);
 	}
@@ -59,13 +60,13 @@ public class test implements AdjustmentListener
 	 *  @param scrollPane the scroll pane to monitor
 	 *  @param viewportPosition valid values are START and END
 	 */
-	public test(JScrollPane scrollPane, int viewportPosition)
+	public SmartScroller(JScrollPane scrollPane, int viewportPosition)
 	{
 		this(scrollPane, VERTICAL, viewportPosition);
 	}
 
 	/**
-	 *  Specify how the test will function.
+	 *  Specify how the SmartScroller will function.
 	 *
 	 *  @param scrollPane the scroll pane to monitor
 	 *  @param scrollDirection indicates which JScrollBar to monitor.
@@ -74,7 +75,7 @@ public class test implements AdjustmentListener
 	 *                          positioned as data is added.
 	 *                          Valid values are START and END
 	 */
-	public test(JScrollPane scrollPane, int scrollDirection, int viewportPosition)
+	public SmartScroller(JScrollPane scrollPane, int scrollDirection, int viewportPosition)
 	{
 		if (scrollDirection != HORIZONTAL
 		&&  scrollDirection != VERTICAL)

@@ -34,7 +34,7 @@ public class Vertex implements Comparable<Vertex>{
 			r = this.previous.printPath();
 //			System.out.printf(" -> %s(%d)", this.name, this.dist);
 			r = r + " " + this.name;
-//			System.out.println(r);
+//			System.out.println("r: " + r + " name: " + this.name + " dist: " + this.dist);
 		}
 		return r;
 	}
