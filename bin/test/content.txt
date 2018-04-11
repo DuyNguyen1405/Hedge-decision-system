@@ -1,0 +1,5 @@
+Notice the use of JTextField's getText method to retrieve the text currently contained by the text field. The text returned by this method does not include a newline character for the Enter key that fired the action event.
+
+You have seen how a basic text field can be used. Because the JTextField class inherits from the JTextComponent class, text fields are very flexible and can be customized almost any way you like. For example, you can add a document listener or a document filter to be notified when the text changes, and in the filter case you can modify the text field accordingly. Information on text components can be found in Text Component Features. Before customizing a JTextField, however, make sure that one of the other components based on text fields will not do the job for you.
+
+Often text fields are paired with labels that describe the text fields. See Examples That Use Text Fields for pointers on creating these pairs.
